@@ -61,13 +61,6 @@ data "google_compute_subnetwork" "ba_subnet" {
   name    = var.subnet
   project = var.vpc_host_project_id
   region  = var.region
-
-  lifecycle {
-    postcondition {
-      condition     = self.private_ip_google_access == true
-      error_message = "Make sure subnet exists and private_ip_google_access is required to be enabled!"
-    }
-  }
 }
 
 # Enable required services
@@ -220,6 +213,7 @@ resource "google_compute_instance" "appliance" {
   zone = var.zone
   lifecycle {
     ignore_changes = [attached_disk, metadata]
+  precondition { condition = data.ba_subnet.private_ip_google_access == true error_message = "Make sure subnet exists and private_ip_google_access is required to be enabled!" } } 
   }
   labels     = var.labels
   tags       = var.network_tags
